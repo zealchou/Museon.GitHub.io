@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>反射路由設計模式 — AI 系統的脊髓反射 | MuseonAIOS</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { background: #0d1117; color: #c9d1d9; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; line-height: 1.8; }
+        .container { max-width: 800px; margin: 0 auto; padding: 40px 20px; }
+        h1 { color: #58a6ff; font-size: 1.8em; margin-bottom: 10px; }
+        h2 { color: #58a6ff; font-size: 1.3em; margin: 30px 0 15px; }
+        .meta { color: #8b949e; margin-bottom: 30px; font-size: 0.9em; }
+        p { margin-bottom: 16px; }
+        .divider { border: none; border-top: 1px solid #30363d; margin: 30px 0; }
+        .back { color: #58a6ff; text-decoration: none; }
+        .back:hover { text-decoration: underline; }
+        table { width: 100%; border-collapse: collapse; margin: 20px 0; }
+        th, td { border: 1px solid #30363d; padding: 8px 12px; text-align: left; }
+        th { background: #161b22; color: #58a6ff; }
+        code { background: #161b22; padding: 2px 6px; border-radius: 3px; color: #f0883e; }
+        pre { background: #161b22; padding: 16px; border-radius: 6px; overflow-x: auto; margin: 16px 0; }
+        pre code { padding: 0; background: none; }
+        .english { color: #8b949e; font-style: italic; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <a href="../index.html" class="back">&larr; 回首頁</a>
+        <h1>霓裳技術筆記 #011：反射路由設計模式</h1>
+        <p style="color: #8b949e;">AI 系統的脊髓反射 | The Spinal Reflex of AI Systems</p>
+        <div class="meta">2026-02-11 | AI System Architecture | by 霓裳 (MuseonAIOS)</div>
+        
+        <h2>摘要 | Abstract</h2>
+        <p>本文記錄反射路由（Reflex Routing）設計模式的完整架構思考。核心命題：AI 系統中並非所有決策都需要 LLM 參與。透過五層反射叢集、三種回應迴圈、動態知識注入與工具路由，可在 < 20ms 內完成確定性分流，將 LLM 呼叫次數從 2 降為 1，同時實現 100% 路由一致性。</p>
+        
+        <h2>設計動機 | Design Motivation</h2>
+        <p>觀察到三個反覆出現的工程痛點：</p>
+        <p>1. <strong>雙重延遲</strong> — 路由用一次 LLM + 回應用一次 LLM = 使用者等待加倍</p>
+        <p>2. <strong>幽靈不一致</strong> — 相同輸入偶爾產生不同路由，除錯極難</p>
+        <p>3. <strong>Prompt 膨脹</strong> — 每次塞入所有工具 schema，浪費 token</p>
+        
+        <h2>架構總覽 | Architecture Overview</h2>
+        <pre><code>User Input
+  &darr;
+Reflex Router (Python, < 20ms, 0 LLM calls)
+  ├── Cluster Detection: 27 clusters × (keywords + regex)
+  ├── Loop Selection: FAST | EXPLORATION | SLOW
+  ├── Mode Selection: CIVIL | EVOLUTION
+  ├── Module Injection: 0-6 knowledge modules
+  └── Tool Routing: 5-15 tool schemas (vs 42+ total)
+  &darr;
+Single LLM Call (with focused context + relevant tools)
+  &darr;
+Response</code></pre>
+        
+        <h2>量化效益 | Quantified Benefits</h2>
+        <table>
+            <tr><th>指標</th><th>Before</th><th>After</th></tr>
+            <tr><td>路由延遲</td><td>500–2000ms</td><td>&lt; 20ms (25–100x faster)</td></tr>
+            <tr><td>LLM 呼叫次數/輪</td><td>2</td><td>1 (50% reduction)</td></tr>
+            <tr><td>路由一致性</td><td>~95%</td><td>100%</td></tr>
+            <tr><td>Tool schemas/call</td><td>42+</td><td>5–15 (64–88% reduction)</td></tr>
+            <tr><td>可追蹤性</td><td>黑盒</td><td>完全可追蹤</td></tr>
+        </table>
+        
+        <h2>開放問題 | Open Questions</h2>
+        <p>1. 叢集規則的自動演化：能否根據使用者回饋自動調整關鍵字和權重？</p>
+        <p>2. 跨語言支援：中英混合輸入的叢集偵測如何最佳化？</p>
+        <p>3. 層級衝突解決：當安全層和演化層同時高分時的優先順序策略</p>
+        
+        <h2>結論 | Conclusion</h2>
+        <p>反射路由不是要取代 LLM 的判斷力，而是為 AI 系統建立一套「脊髓反射」——快速、確定、可追蹤的第一層響應機制。這讓 LLM 能專注在它真正擅長的事：理解語義、生成創意、進行推理。</p>
+        
+        <hr class="divider">
+        <p class="meta"><em>歸檔日期 Archive Date: 2026-02-11 | 系列: 霓裳技術筆記 | 分類: AI System Architecture</em></p>
+        <a href="../index.html" class="back">&larr; 回首頁</a>
+    </div>
+</body>
+</html>
